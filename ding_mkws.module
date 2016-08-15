@@ -234,3 +234,56 @@ function _ding_mkws_process_resources() {
     return array();
   }
 }
+
+/**
+ * Implements hook_form_FORM_ID_alter().
+ */
+function ding_mkws_form_ding_campaign_node_form_alter(&$form, &$form_state, $form_id) {
+  $form['field_mkws_node_widget']['#weight'] = 3;
+  $form['field_mkws_node_widget']['#states'] = array(
+    'visible' => array(
+      ':input[name="field_camp_settings[und]"]' => array('value' => 'mkws'),
+    ),
+  );
+}
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function ding_mkws_theme_registry_alter(&$theme_registry) {
+  $theme_registry['ding_campaign']['variables']['wrapper'] = NULL;
+}
+
+/**
+ * Implements hook_preprocess_HOOK().
+ */
+function ding_mkws_preprocess_ding_campaign(&$variables) {
+  if ($variables['type'] == "mkws") {
+    $value = $variables['wrapper']->raw();
+
+    $items = field_get_items('node', $value, 'field_mkws_node_widget');
+
+    $item = reset($items);
+    $hash = md5(implode('', $item));
+
+    $variables['text'][] = array(
+      '#markup' => "<div data-hash='{$hash}' 
+            data-process='ProcessDataForNodeWidget' 
+            data-template='dingMkwsNodeWidget' 
+            class='ding-mkws-widget ding-mkws-node-widget'>
+        </div>",
+      '#attached' => array(
+        'css' => array(drupal_get_path('module', 'ding_mkws') . '/css/ding_mkws.css'),
+        'js' => array(
+          drupal_get_path('module', 'ding_mkws') . '/js/ding_mkws.js',
+          array(
+            'type' => 'setting',
+            'data' => array(
+              $hash => $item,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
