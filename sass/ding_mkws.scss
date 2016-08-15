@@ -120,3 +120,20 @@ $zen-gutters:             20px;
     }
   }
 }
+
+.ding-campaign--content {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.page-node .ding-campaign--content .ding-mkws-widget {
+  .ding-mkws-left,
+  .ding-mkws-rigt {
+    @include zen-grid-item(12, 1);
+
+    clear: both;
+    margin-right: -10px;
+    margin-left: -10px;
+  }
+}
+
