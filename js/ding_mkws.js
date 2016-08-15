@@ -58,8 +58,7 @@ var ding_mkws = {
 
   ding_mkws.init = function (settings, onShowCallback, failCallback) {
     ding_mkws.settings = Drupal.settings.ding_mkws;
-    console.log(settings);
-    debugger;
+
     var pz2Params = {
       "pazpar2path": ding_mkws.settings.proxy,
       "usesessions": false,
