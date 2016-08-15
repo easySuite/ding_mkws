@@ -22,7 +22,7 @@ var ding_mkws_process = {};
         url = data.hits[i]['md-bibliofil-url'][0];
       }
       finally {
-        out[url] = url;
+        out['url'] = url;
         variables.items[idx].push(out);
       }
     }
@@ -47,7 +47,7 @@ var ding_mkws_process = {};
         url = data.hits[i]['md-bibliofil-url'][0];
       }
       finally {
-        out[url] = url;
+        out['url'] = url;
         variables.items.push(out);
       }
     }
@@ -137,6 +137,3 @@ var ding_mkws_process = {};
       "</div>" +
     "</div>");
 })(jQuery);
-
-// http://ac.ddbcms.dev.inlead.dk/service-proxy?command=auth&action=login&username=emusik_no462&password=emusik_no462
-// http://ng.ddbcms.dev.inlead.dk/service-proxy/?command=auth&action=login&username=emusik_no462&password=emusik_no462
