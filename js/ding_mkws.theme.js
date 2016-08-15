@@ -52,6 +52,10 @@ var ding_mkws_process = {};
       }
     }
 
+    if (data.hits.length === 0) {
+      variables.title = "";
+    }
+
     return variables;
   };
 
