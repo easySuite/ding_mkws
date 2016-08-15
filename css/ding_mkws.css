@@ -326,3 +326,24 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+.ding-campaign--content {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.page-node .ding-campaign--content .ding-mkws-widget .ding-mkws-left,
+.page-node .ding-campaign--content .ding-mkws-widget .ding-mkws-rigt {
+  float: left;
+  width: 100%;
+  margin-left: 0%;
+  margin-right: -100%;
+  padding-left: 10px;
+  padding-right: 10px;
+  -moz-box-sizing: border-box;
+  -webkit-box-sizing: border-box;
+  box-sizing: border-box;
+  clear: both;
+  margin-right: -10px;
+  margin-left: -10px;
+}
