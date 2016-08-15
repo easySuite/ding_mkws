@@ -259,7 +259,7 @@ function ding_mkws_types_settings_form_submit($form, &$form_state) {
           'description' => '',
           'display' => array(
             'default' => array(
-              'label' => 'hidden',
+              'label' => 'above',
               'module' => 'ding_mkws',
               'settings' => array(),
               'type' => 'ding_mkws_node_formatter_default',
@@ -293,7 +293,7 @@ function ding_mkws_types_settings_form_submit($form, &$form_state) {
           ),
           'entity_type' => 'node',
           'field_name' => 'field_mkws_node_widget',
-          'label' => 'MKWS node widget',
+          'label' => 'Content for LBR',
           'required' => 0,
           'settings' => array(
             'user_register_form' => FALSE,
