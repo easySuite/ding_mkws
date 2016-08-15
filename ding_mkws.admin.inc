@@ -265,6 +265,13 @@ function ding_mkws_types_settings_form_submit($form, &$form_state) {
               'type' => 'ding_mkws_node_formatter_default',
               'weight' => 11,
             ),
+            'full' => array(
+              'label' => 'hidden',
+              'module' => 'ding_mkws',
+              'settings' => array(),
+              'type' => 'ding_mkws_node_formatter_default',
+              'weight' => 11,
+            ),
             'search_result' => array(
               'label' => 'hidden',
               'settings' => array(),

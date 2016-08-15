@@ -1,16 +1,22 @@
 <?php
+
 /**
  * @file
  * Represents all logic related to (un)installing and DB scheme definition.
  */
 
-
 /**
  * Implements hook_install().
  */
 function ding_mkws_install() {
-  _ding_mkws_create_pane();
+  if (module_exists('ding_campaign')) {
+    $field = field_info_field('field_camp_settings');
+    $allowed_values = &$field['settings']['allowed_values'];
+    $allowed_values['mkws'] = 'MKWS';
+    field_update_field($field);
+  }
 
+  _ding_mkws_create_pane();
   variable_set('ding_mkws_global', array());
 }
 
@@ -18,6 +24,21 @@ function ding_mkws_install() {
  * Implements hook_uninstall().
  */
 function ding_mkws_uninstall() {
+  db_update('ding_campaign')
+    ->fields(array(
+      'type' => 'plain',
+    ))
+    ->condition('type', 'mkws', '=')
+    ->execute();
+
+  $field = field_read_field('field_camp_settings');
+  $allowed_values = &$field['settings']['allowed_values'];
+  if (in_array('mkws', $allowed_values)) {
+    unset($allowed_values['mkws']);
+  }
+  $field['settings']['allowed_values'] = $allowed_values;
+  field_update_field($field);
+
   _ding_mkws_delete_pane();
   $base = field_info_field('field_mkws_node_widget');
   if (!$base) {
@@ -54,9 +75,7 @@ function ding_mkws_field_schema($field) {
         ),
       );
       break;
-
   }
-
   return $schema;
 }
 
@@ -148,5 +167,17 @@ function _ding_mkws_delete_pane() {
         break;
       }
     }
+  }
+}
+
+/**
+ * Adding MKWS option to campaign settings.
+ */
+function ding_mkws_update_7001() {
+  if (module_exists('ding_campaign')) {
+    $instance = field_info_field('field_camp_settings');
+    $allowed_values = &$instance['settings']['allowed_values'];
+    $allowed_values['mkws'] = 'MKWS';
+    field_update_field($instance);
   }
 }
