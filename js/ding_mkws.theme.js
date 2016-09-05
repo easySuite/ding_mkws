@@ -2,7 +2,52 @@
  * @file
  * Represents functionality which relates to theme.
  */
+'use strict';
 var ding_mkws_process = {};
+
+/**
+ * Function designed to call functions in given order.
+ * @param url
+ * @returns {*}
+ */
+function processExternalUrl(url) {
+  var newUrl;
+  var process_callbacks = Drupal.settings.preprocessExternalUrlCallbacks;
+
+  process_callbacks.forEach(function(item, i, process_callbacks) {
+    if (item === 'ting_proxy') {
+      newUrl = ting_proxy(url);
+    }
+  });
+
+  return newUrl;
+}
+
+/**
+ * URL processing.
+ * @param data
+ * @returns {URL}
+ */
+function ting_proxy(data) {
+  var url = new URL(data);
+  var ting_proxy = Drupal.settings.ding_mkws.proxy_settings;
+
+  for (var i = 0; i < ting_proxy.hostnames.length; i++) {
+    if (ting_proxy.hostnames[i].hostname === url.hostname && ting_proxy.hostnames[i].disable_prefix === 0) {
+      var regexp = ting_proxy.hostnames[i].expression.regex;
+      var replacement = ting_proxy.hostnames[i].expression.replacement;
+
+      url = ting_proxy.prefix + url;
+
+      if (regexp.length > 0 && replacement.length > 0) {
+        var url = url.replace(new RegExp(regexp), replacement);
+      }
+    }
+  }
+
+  return url;
+}
+
 (function ($) {
 
   ding_mkws_process.ProcessDataForNodeWidget = function(data) {
@@ -22,7 +67,7 @@ var ding_mkws_process = {};
         url = data.hits[i]['md-bibliofil-url'][0];
       }
       finally {
-        out['url'] = url;
+        out['url'] = processExternalUrl(url);
         variables.items[idx].push(out);
       }
     }
@@ -47,7 +92,7 @@ var ding_mkws_process = {};
         url = data.hits[i]['md-bibliofil-url'][0];
       }
       finally {
-        out['url'] = url;
+        out['url'] = processExternalUrl(url);
         variables.items.push(out);
       }
     }
