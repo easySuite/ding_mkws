@@ -202,6 +202,26 @@ function ding_mkws_include_all() {
   ));
 
   $settings['sid'] = $sid;
+
+  // Integrate ting_proxy features.
+  $callbacks = array();
+
+  if (module_exists('ting_proxy')) {
+    $proxy_settings = variable_get('ting_proxy', array());
+    $callbacks[] = 'ting_proxy';
+
+    $settings['proxy_settings'] = $proxy_settings;
+  }
+
+  drupal_alter('spt_external_url', $callbacks);
+
+  drupal_add_js(
+    array(
+      'preprocessExternalUrlCallbacks' => $callbacks,
+    ),
+    array('type' => 'setting')
+  );
+
   drupal_add_js(array('ding_mkws' => $settings), 'setting');
 }
 
