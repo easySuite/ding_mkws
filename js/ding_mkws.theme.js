@@ -10,18 +10,19 @@ var ding_mkws_process = {};
  * @param url
  * @returns {*}
  */
-function processExternalUrl(url) {
-  var newUrl;
-  var process_callbacks = Drupal.settings.preprocessExternalUrlCallbacks;
+Drupal.mkwsProcessExternalUrl = function (url) {
+  var process_callbacks = Drupal.settings.mkwsPreprocessExternalUrlCallbacks;
 
   process_callbacks.forEach(function(item, i, process_callbacks) {
-    if (item === 'ting_proxy') {
-      newUrl = ting_proxy(url);
+    var urlCallback = window[item];
+
+    if (typeof urlCallback === 'function') {
+      url = urlCallback(url);
     }
   });
 
-  return newUrl;
-}
+  return url;
+};
 
 /**
  * URL processing.
@@ -31,16 +32,17 @@ function processExternalUrl(url) {
 function ting_proxy(data) {
   var url = new URL(data);
   var ting_proxy = Drupal.settings.ding_mkws.proxy_settings;
+  if (ting_proxy.hostnames !== undefined && ting_proxy.hostnames.length > 0) {
+    for (var i = 0; i < ting_proxy.hostnames.length; i++) {
+      if (ting_proxy.hostnames[i].hostname === url.hostname && ting_proxy.hostnames[i].disable_prefix === 0) {
+        var regexp = ting_proxy.hostnames[i].expression.regex;
+        var replacement = ting_proxy.hostnames[i].expression.replacement;
 
-  for (var i = 0; i < ting_proxy.hostnames.length; i++) {
-    if (ting_proxy.hostnames[i].hostname === url.hostname && ting_proxy.hostnames[i].disable_prefix === 0) {
-      var regexp = ting_proxy.hostnames[i].expression.regex;
-      var replacement = ting_proxy.hostnames[i].expression.replacement;
+        url = ting_proxy.prefix + url;
 
-      url = ting_proxy.prefix + url;
-
-      if (regexp.length > 0 && replacement.length > 0) {
-        var url = url.replace(new RegExp(regexp), replacement);
+        if (regexp.length > 0 && replacement.length > 0) {
+          var url = url.replace(new RegExp(regexp), replacement);
+        }
       }
     }
   }
@@ -67,7 +69,7 @@ function ting_proxy(data) {
         url = data.hits[i]['md-bibliofil-url'][0];
       }
       finally {
-        out['url'] = processExternalUrl(url);
+        out['url'] = Drupal.mkwsProcessExternalUrl(url);
         variables.items[idx].push(out);
       }
     }
@@ -92,7 +94,7 @@ function ting_proxy(data) {
         url = data.hits[i]['md-bibliofil-url'][0];
       }
       finally {
-        out['url'] = processExternalUrl(url);
+        out['url'] = Drupal.mkwsProcessExternalUrl(url);
         variables.items.push(out);
       }
     }
@@ -125,7 +127,7 @@ function ting_proxy(data) {
                 "<p class='ding-mkws-target'>" +
                   '{{:target}}' +
                 "</p>" +
-                "<a class='ding-mkws-title' href='{{:url}}'>" +
+                "<a class='ding-mkws-title' href='{{:url}}' target='_blank'>" +
                   '{{:title}}' +
                 "</a>" +
               "</div>" +
@@ -147,7 +149,7 @@ function ting_proxy(data) {
                 "<p class='ding-mkws-target'>" +
                   '{{:target}}' +
                 "</p>" +
-                "<a class='ding-mkws-title'  href='{{:url}}'>" +
+                "<a class='ding-mkws-title'  href='{{:url}}' target='_blank'>" +
                 '{{:title}}' +
                 "</a>" +
               "</div>" +
@@ -177,7 +179,7 @@ function ting_proxy(data) {
               "<p class='ding-mkws-target'>" +
                 '{{:target}}' +
               "</p>" +
-              "<a class='ding-mkws-title'  href='{{:url}}'>" +
+              "<a class='ding-mkws-title'  href='{{:url}}' target='_blank'>" +
                 '{{:title}}' +
               "</a>" +
             "</div>" +
