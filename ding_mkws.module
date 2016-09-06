@@ -217,7 +217,7 @@ function ding_mkws_include_all() {
 
   drupal_add_js(
     array(
-      'preprocessExternalUrlCallbacks' => $callbacks,
+      'mkwsPreprocessExternalUrlCallbacks' => $callbacks,
     ),
     array('type' => 'setting')
   );
