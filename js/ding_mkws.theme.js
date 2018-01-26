@@ -78,6 +78,8 @@ function ting_proxy(data) {
   };
 
   ding_mkws_process.ProcessDataForPaneWidget = function(data) {
+    $('.mkdru-counts-total').html('(' + data.total + ')');
+
     var variables = {title: Drupal.t('Content for LBR'), items: []};
     for (var i = 0 ; i < data.hits.length; i++) {
       var out = {};
