@@ -24,8 +24,8 @@ function ding_mkws_libraries_info() {
 
   $libraries['jsrender'] = array(
     'name' => 'JS Render',
-    'vendor url' => 'https://github.com//BorisMoore/jsrender',
-    'download url' => 'https://github.com//BorisMoore/jsrender/archive/master.zip',
+    'vendor url' => 'https://github.com/BorisMoore/jsrender',
+    'download url' => 'https://github.com/BorisMoore/jsrender/archive/master.zip',
     'version callback' => 'ding_mkws_version_callback',
     'files' => array(
       'js' => array('jsrender.min.js'),
@@ -123,9 +123,10 @@ function ding_mkws_ctools_plugin_directory($module, $plugin) {
  * @return mixed
  *   Bool or object.
  *
- * @throws Exception.
+ * @throws Exception
+ *   If mkdru service not configured.
  */
-function _ding_mkws_request($command, $settings, $action = NULL) {
+function _ding_mkws_request($command, array $settings, $action = NULL) {
   $sid = &drupal_static(__FUNCTION__);
   if (empty($settings['user']) || empty($settings['password']) || empty($settings['url'])) {
     throw new Exception(t('Please configure mkdru !settings first.', array('!settings' => l(t('settings'), 'admin/config/ding/mkws'))));
@@ -178,7 +179,6 @@ function ding_mkws_include_all() {
   libraries_load('pz2');
   libraries_load('jsrender');
   $settings = variable_get('ding_mkws_settings', array());
-
   try {
     $sid = _ding_mkws_request('auth', $settings, 'login');
   }
@@ -205,14 +205,6 @@ function ding_mkws_include_all() {
 
   // Integrate ting_proxy features.
   $callbacks = array();
-
-  if (module_exists('ting_proxy')) {
-    $proxy_settings = variable_get('ting_proxy', array());
-    $callbacks[] = 'ting_proxy';
-
-    $settings['proxy_settings'] = $proxy_settings;
-  }
-
   drupal_alter('spt_external_url', $callbacks);
 
   drupal_add_js(
@@ -221,18 +213,8 @@ function ding_mkws_include_all() {
     ),
     array('type' => 'setting')
   );
-
   drupal_add_js(array('ding_mkws' => $settings), 'setting');
 }
-
-
-/**
- * Implements hook_init().
- */
-function ding_mkws_init() {
-  ding_mkws_include_all();
-}
-
 
 /**
  * Helper function for getting and processing resources.
@@ -253,6 +235,25 @@ function _ding_mkws_process_resources() {
     drupal_set_message(t('Something goes wrong. Check reports for details.'));
     return array();
   }
+}
+
+/**
+ * Get only the resources that are saved on the admin page.
+ *
+ * @return array
+ *   Processed resources.
+ */
+function _ding_mkws_get_processed_resources() {
+  $resources = _ding_mkws_process_resources();
+  $settings = variable_get('ding_mkws_global', array());
+  $options = array();
+  foreach ($settings['resources']['values'] as $value) {
+    if ($value) {
+      $options[$value] = $resources[$value];
+    }
+  }
+
+  return $options;
 }
 
 /**
@@ -283,27 +284,99 @@ function ding_mkws_preprocess_ding_campaign(&$variables) {
 
     $items = field_get_items('node', $value, 'field_mkws_node_widget');
 
-    $item = reset($items);
-    $hash = md5(implode('', $item));
+    if ($items) {
+      $item = reset($items);
 
-    $variables['text'][] = array(
-      '#markup' => "<div data-hash='{$hash}' 
-            data-process='ProcessDataForNodeWidget' 
-            data-template='dingMkwsNodeWidget' 
-            class='ding-mkws-widget ding-mkws-node-widget'>
-        </div>",
-      '#attached' => array(
-        'css' => array(drupal_get_path('module', 'ding_mkws') . '/css/ding_mkws.css'),
-        'js' => array(
-          drupal_get_path('module', 'ding_mkws') . '/js/ding_mkws.js',
+      // Validate item before the processing.
+      if (empty($item['maxrecs'])) {
+        unset($item['maxrecs']);
+      }
+
+      $hash = md5(
+        implode(
+          '',
           array(
-            'type' => 'setting',
-            'data' => array(
-              $hash => $item,
+            $item['term'],
+            $item['amount'],
+            implode(',', $item['resources']),
+          )
+        )
+      );
+
+      ding_mkws_include_all();
+      $markup = array(
+        '#type' => 'html_tag',
+        '#tag' => 'div',
+        '#attributes' => array(
+          'data-hash' => $hash,
+          'data-process' => 'ProcessDataForPaneWidget',
+          'data-template' => 'dingMkwsPaneWidget',
+          'class' => array(
+            'ding-mkws-widget',
+            'ding-mkws-pane-widget',
+          ),
+        ),
+      );
+
+      $variables['text'] = array(
+        '#markup' => drupal_render($markup),
+        '#attached' => array(
+          'css' => array(drupal_get_path('module', 'ding_mkws') . '/css/ding_mkws.css'),
+          'js' => array(
+            drupal_get_path('module', 'ding_mkws') . '/js/ding_mkws.js',
+            array(
+              'type' => 'setting',
+              'data' => array(
+                $hash => $item,
+              ),
             ),
           ),
         ),
-      ),
-    );
+      );
+    }
+  }
+}
+
+/**
+ * Implements hook_bpi_push_data_alter().
+ */
+function ding_mkws_bpi_push_data_alter(&$node, &$data) {
+  $allowed = variable_get('ding_mkws_types', array());
+  if (in_array($node->type, $allowed)) {
+    $value = field_get_items('node', $node, 'field_mkws_node_widget');
+    if (!empty($value[0]['term']) && $value[0]['resources']) {
+      $value = serialize($value);
+      $value = '{{' . $value . '}}';
+      $data['body'] .= $value;
+    }
+  }
+}
+
+/**
+ * Implements hook_bpi_syndicate_data_alter().
+ */
+function ding_mkws_bpi_syndicate_data_alter(&$form, &$data) {
+  $allowed = variable_get('ding_mkws_types', array());
+  if (in_array($form['#node']->type, $allowed)) {
+    if (isset($form['field_mkws_node_widget'][LANGUAGE_NONE][0])) {
+      preg_match_all('/{{([(\S)]+)}}/', $data['body'], $matches);
+      if (isset($matches[1])) {
+        $value = unserialize($matches[1][0]);
+        if (!empty($value[0]['term']) && $value[0]['resources']) {
+          $value = $value[0];
+          $form['field_mkws_node_widget'][LANGUAGE_NONE][0]['wrapper']['term']['#default_value'] = $value['term'];
+          $form['field_mkws_node_widget'][LANGUAGE_NONE][0]['wrapper']['resources']['#default_value'] = unserialize($value['resources']);
+          $form['field_mkws_node_widget'][LANGUAGE_NONE][0]['wrapper']['amount']['#default_value'] = $value['amount'];
+          $form['field_mkws_node_widget'][LANGUAGE_NONE][0]['wrapper']['maxrecs']['#default_value'] = $value['maxrecs'];
+          if ($value['toggle_title']) {
+            $form['field_mkws_node_widget'][LANGUAGE_NONE][0]['wrapper']['toggle_title']['#default_value'] = $value['toggle_title'];
+            $form['field_mkws_node_widget'][LANGUAGE_NONE][0]['wrapper']['widget_headline']['#default_value'] = $value['widget_headline'];
+          }
+        }
+      }
+    }
+
+    $data['body'] = preg_replace('/{{([(\S)]+)}}/', '', $data['body']);
+    $form['field_ding_news_body'][LANGUAGE_NONE][0]['#default_value'] = $data['body'];
   }
 }
