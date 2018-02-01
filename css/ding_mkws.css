@@ -228,69 +228,13 @@
 .ding-mkws-widget {
   margin-bottom: 20px;
 }
-.ding-mkws-widget > .ding-mkws-title {
-  color: #7c7c7c;
-  font-weight: bold;
-  display: block;
-  font-size: 110%;
-  margin-bottom: 10px;
-  margin-top: 10px;
-}
 .ding-mkws-widget .ding-mkws-content ul {
   margin: 0;
   padding: 0;
 }
 .ding-mkws-widget .ding-mkws-content li {
-  margin-bottom: 10px;
   overflow: hidden;
-  padding: 10px 0;
   list-style: none;
-}
-.ding-mkws-widget .ding-mkws-content li:nth-child(even) {
-  background-color: #f2f2f2;
-}
-.ding-mkws-widget .ding-mkws-content li:nth-child(odd) {
-  background-color: #e8e8e8;
-}
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-header {
-  float: left;
-  display: block;
-  margin-: 2.4911%;
-  width: 31.6726%;
-  margin-left: 10px;
-}
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-header:last-child {
-  margin-: 0;
-}
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-header .ding-mkws-target,
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-header .ding-mkws-name,
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-header .ding-mkws-title {
-  font-weight: bold;
-}
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-values {
-  float: left;
-  display: block;
-  margin-: 2.4911%;
-  width: 48.75445%;
-  margin-left: 10px;
-}
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-values:last-child {
-  margin-: 0;
-}
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-values .ding-mkws-target,
-.ding-mkws-widget .ding-mkws-content li .ding-mkws-values .ding-mkws-title {
-  font-weight: normal;
-}
-.ding-mkws-widget .ding-mkws-content li p {
-  margin: 0 0 5px 0;
-  padding: 0;
-}
-.ding-mkws-widget .ding-mkws-content li p, .ding-mkws-widget .ding-mkws-content li a {
-  display: block;
-  height: 22px;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
 }
 
 .page-node .field-type-ding-mkws-node {
@@ -299,24 +243,6 @@
 }
 .page-node .ding-mkws-widget {
   overflow: hidden;
-}
-.page-node .ding-mkws-widget .ding-mkws-content li .ding-mkws-header {
-  float: left;
-  display: block;
-  margin-: 2.4911%;
-  width: 31.6726%;
-}
-.page-node .ding-mkws-widget .ding-mkws-content li .ding-mkws-header:last-child {
-  margin-: 0;
-}
-.page-node .ding-mkws-widget .ding-mkws-content li .ding-mkws-values {
-  float: left;
-  display: block;
-  margin-: 2.4911%;
-  width: 48.75445%;
-}
-.page-node .ding-mkws-widget .ding-mkws-content li .ding-mkws-values:last-child {
-  margin-: 0;
 }
 .page-node .ding-mkws-widget .ding-mkws-left {
   float: left;
@@ -363,12 +289,12 @@
     margin-: 0;
   }
 }
-.page-node .ding-mkws-widget p, .page-node .ding-mkws-widget a {
-  display: block;
-  height: 22px;
+.page-node .ding-mkws-widget p, .page-node .ding-mkws-widget .ding-mkws-title {
+  white-space: nowrap;
+  width: 22em;
   overflow: hidden;
   text-overflow: ellipsis;
-  white-space: nowrap;
+  display: block;
 }
 
 .ding-campaign--content {
@@ -376,17 +302,55 @@
   margin-bottom: 20px;
 }
 
-.page-node .ding-campaign--content .ding-mkws-widget .ding-mkws-left,
-.page-node .ding-campaign--content .ding-mkws-widget .ding-mkws-rigt {
-  float: left;
-  display: block;
-  margin-: 41.17647%;
-  width: 100%;
-  clear: both;
-  margin-right: -10px;
-  margin-left: -10px;
+.ding-mkws-rows {
+  margin-bottom: 10px;
+  overflow: hidden;
+  padding: 10px 0;
+  list-style: none;
+  margin-bottom: 20px;
 }
-.page-node .ding-campaign--content .ding-mkws-widget .ding-mkws-left:last-child,
-.page-node .ding-campaign--content .ding-mkws-widget .ding-mkws-rigt:last-child {
-  margin-: 0;
+.ding-mkws-rows .left-label .ding-mkws-title,
+.ding-mkws-rows .left-label .ding-mkws-target,
+.ding-mkws-rows .left-label .ding-mkws-author,
+.ding-mkws-rows .left-label .ding-mkws-date {
+  font-weight: bold;
+  font-size: 16px;
+}
+.ding-mkws-rows .right-value {
+  font-size: 16px;
+}
+.ding-mkws-rows:nth-child(even) {
+  background-color: #f2f2f2;
+}
+.ding-mkws-rows:nth-child(odd) {
+  background-color: #e8e8e8;
+}
+.ding-mkws-rows .row {
+  width: 100%;
+}
+.ding-mkws-rows .row .left-label,
+.ding-mkws-rows .row .right-value {
+  width: auto;
+  float: left;
+  height: 40px;
+  padding: 5px 0;
+}
+.ding-mkws-rows .row .right-value {
+  width: 70%;
+}
+.ding-mkws-rows .row .right-value.page-search p, .ding-mkws-rows .row .right-value .ding-mkws-title {
+  white-space: nowrap;
+  width: 15em;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block;
+}
+.ding-mkws-rows .row .left-label {
+  width: 30%;
+  padding-left: 10px;
+}
+
+.ding-mkws-more-link {
+  float: right;
+  bottom: 0;
 }

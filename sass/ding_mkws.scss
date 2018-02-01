@@ -4,15 +4,6 @@
 
 .ding-mkws-widget {
   margin-bottom: 20px;
-
-  > .ding-mkws-title {
-    color: #7c7c7c;
-    font-weight: bold;
-    display: block;
-    font-size: 110%;
-    margin-bottom: 10px;
-    margin-top: 10px;
-  }
   
   .ding-mkws-content {
     ul {
@@ -21,52 +12,8 @@
     }
 
     li {
-      margin-bottom: 10px;
       overflow: hidden;
-      padding: 10px 0;
       list-style: none;
-
-      &:nth-child(even) {
-        background-color: #f2f2f2;
-      }
-
-      &:nth-child(odd) {
-        background-color: #e8e8e8;
-      }
-
-      .ding-mkws-header {
-        @include span-columns(4 of 12);
-        margin-left: 10px;
-
-        .ding-mkws-target,
-        .ding-mkws-name,
-        .ding-mkws-title {
-          font-weight: bold;
-        }
-      }
-
-      .ding-mkws-values {
-        @include span-columns(6 of 12);
-        margin-left: 10px;
-
-        .ding-mkws-target,
-        .ding-mkws-title {
-          font-weight: normal;
-        }
-      }
-
-      p {
-        margin: 0 0 5px 0;
-        padding: 0;
-      }
-
-      p, a {
-        display: block;
-        height: 22px;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-      }
     }
   }
 }
@@ -79,14 +26,6 @@
 
   .ding-mkws-widget {
     overflow: hidden;
-
-    .ding-mkws-content li .ding-mkws-header {
-      @include span-columns(4 of 12);
-    }
-
-    .ding-mkws-content li .ding-mkws-values {
-      @include span-columns(6 of 12);
-    }
 
     .ding-mkws-left {
       @include span-columns(6 of 12);
@@ -111,12 +50,12 @@
       }
    }
 
-    p, a {
-      display: block;
-      height: 22px;
+    p, .ding-mkws-title {
+      white-space: nowrap;
+      width: 22em;
       overflow: hidden;
       text-overflow: ellipsis;
-      white-space: nowrap;
+      display: block;
     }
   }
 }
@@ -126,14 +65,65 @@
   margin-bottom: 20px;
 }
 
-.page-node .ding-campaign--content .ding-mkws-widget {
-  .ding-mkws-left,
-  .ding-mkws-rigt {
-    @include span-columns(1 of 1);
+.ding-mkws-rows {
+  margin-bottom: 10px;
+  overflow: hidden;
+  padding: 10px 0;
+  list-style: none;
+  margin-bottom: 20px;
 
-    clear: both;
-    margin-right: -10px;
-    margin-left: -10px;
+  .left-label {
+    .ding-mkws-title,
+    .ding-mkws-target,
+    .ding-mkws-author,
+    .ding-mkws-date {
+      font-weight: bold;
+      font-size: 16px;
+    }
+  }
+
+  .right-value {
+    font-size: 16px;
+  }
+  &:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  &:nth-child(odd) {
+    background-color: #e8e8e8;
+  }
+
+  .row {
+    width: 100%;
+
+    .left-label,
+    .right-value {
+      width: auto;
+      float: left;
+      height: 40px;
+      padding: 5px 0;
+    }
+
+    .right-value {
+      width: 70%;
+
+     &.page-search p, .ding-mkws-title {
+        white-space: nowrap;
+        width: 15em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+      }
+    }
+
+    .left-label {
+      width: 30%;
+      padding-left: 10px;
+    }
   }
 }
 
+.ding-mkws-more-link {
+  float: right;
+  bottom: 0;
+}
