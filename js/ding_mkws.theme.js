@@ -221,7 +221,7 @@ Drupal.mkwsProcessExternalUrl = function (url, target) {
                 "<div class='row'>" +
                   "<div class='left-label'>" +
                     "<p class='ding-mkws-date'>" +
-                      Drupal.t('Target') +
+                      Drupal.t('Date') +
                     "</p>" +
                   "</div>" +
                   "<div class='right-value'>"+
@@ -295,7 +295,7 @@ Drupal.mkwsProcessExternalUrl = function (url, target) {
                 "<div class='row'>" +
                   "<div class='left-label'>" +
                     "<p class='ding-mkws-date'>" +
-                      Drupal.t('Target') +
+                      Drupal.t('Date') +
                     "</p>" +
                   "</div>" +
                   "<div class='right-value'>"+
