@@ -50,7 +50,7 @@
       }
    }
 
-    p, .ding-mkws-title {
+    .ding-mkws-author {
       white-space: nowrap;
       width: 22em;
       overflow: hidden;
@@ -106,14 +106,27 @@
 
     .right-value {
       width: 70%;
+      height: auto;
+      padding-right: 5px;
 
-     &.page-search p, .ding-mkws-title {
+      p {
+        margin-bottom: 10px;
+      }
+
+      .ding-mkws-author {
         white-space: nowrap;
         width: 15em;
         overflow: hidden;
         text-overflow: ellipsis;
         display: block;
       }
+
+      .ding-mkws-title {
+        display: inline-block;
+        height: auto;
+        white-space: inherit;
+      }
+
     }
 
     .left-label {
