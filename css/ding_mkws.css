@@ -289,7 +289,7 @@
     margin-: 0;
   }
 }
-.page-node .ding-mkws-widget p, .page-node .ding-mkws-widget .ding-mkws-title {
+.page-node .ding-mkws-widget .ding-mkws-author {
   white-space: nowrap;
   width: 22em;
   overflow: hidden;
@@ -337,13 +337,23 @@
 }
 .ding-mkws-rows .row .right-value {
   width: 70%;
+  height: auto;
+  padding-right: 5px;
 }
-.ding-mkws-rows .row .right-value.page-search p, .ding-mkws-rows .row .right-value .ding-mkws-title {
+.ding-mkws-rows .row .right-value p {
+  margin-bottom: 10px;
+}
+.ding-mkws-rows .row .right-value .ding-mkws-author {
   white-space: nowrap;
   width: 15em;
   overflow: hidden;
   text-overflow: ellipsis;
   display: block;
+}
+.ding-mkws-rows .row .right-value .ding-mkws-title {
+  display: inline-block;
+  height: auto;
+  white-space: inherit;
 }
 .ding-mkws-rows .row .left-label {
   width: 30%;
