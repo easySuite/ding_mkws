@@ -241,6 +241,11 @@
   clear: left;
   padding-top: 20px;
 }
+.page-node .field-type-ding-mkws-node .field-label {
+  font-weight: bold;
+  font-size: 16px;
+  padding-bottom: 10px;
+}
 .page-node .ding-mkws-widget {
   overflow: hidden;
 }
@@ -297,6 +302,12 @@
   display: block;
 }
 
+.ding-mkws-widget .ding-mkws-title {
+  font-weight: bold;
+  font-size: 16px;
+  padding-bottom: 10px;
+}
+
 .ding-campaign--content {
   margin-top: 20px;
   margin-bottom: 20px;
@@ -332,11 +343,11 @@
 .ding-mkws-rows .row .right-value {
   width: auto;
   float: left;
-  height: 40px;
+  height: 30px;
   padding: 5px 0;
 }
 .ding-mkws-rows .row .right-value {
-  width: 70%;
+  width: 59%;
   height: auto;
   padding-right: 5px;
 }
@@ -358,6 +369,10 @@
 .ding-mkws-rows .row .left-label {
   width: 30%;
   padding-left: 10px;
+}
+.ding-mkws-rows .row .left-label p {
+  margin-bottom: 10px;
+  width: auto;
 }
 
 .ding-mkws-more-link {
