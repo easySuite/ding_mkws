@@ -44,7 +44,7 @@ function ding_mkws_item_list_render($subtype, $conf, $panel_args, $context) {
 
         switch ($conf['scope']) {
           case 'au':
-            if (count($record['dc:creator']) > 0) {
+            if (isset($record['dc:creator']) && count($record['dc:creator']) > 0) {
               $result = reset($record['dc:creator']);
               if (isset($result[0])) {
                 $author = $result[0];
