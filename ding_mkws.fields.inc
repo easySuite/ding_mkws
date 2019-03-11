@@ -74,13 +74,14 @@ function ding_mkws_field_widget_form(&$form, &$form_state, $field, $instance, $l
         '#attributes' => array('placeholder' => t('Type in your term(s) here...')),
       );
 
-      $options = _ding_mkws_process_resources();
+      $options = _ding_mkws_get_processed_resources();
       $element['wrapper']['resources'] = array(
         '#type' => 'select',
         '#title' => t('Resources:'),
         '#default_value' => !empty($item['resources']) ? $item['resources'] : NULL,
         '#options' => $options,
         '#empty_option' => t('Choose LBRs'),
+        '#multiple' => TRUE,
       );
 
       $element['wrapper']['amount'] = array(
@@ -92,6 +93,36 @@ function ding_mkws_field_widget_form(&$form, &$form_state, $field, $instance, $l
         '#maxlength' => 4,
       );
 
+      $element['wrapper']['maxrecs'] = array(
+        '#type' => 'textfield',
+        '#title' => t('Maxrecs'),
+        '#default_value' => !empty($item['maxrecs']) ? $item['maxrecs'] : '',
+        '#size' => 6,
+        '#maxlength' => 4,
+      );
+
+      $element['wrapper']['toggle_title'] = array(
+        '#prefix' => '<br>',
+        '#type' => 'checkbox',
+        '#title' => t('Change widget headline'),
+        '#default_value' => !empty($item['toggle_title']) ? $item['toggle_title'] : 0,
+      );
+
+      $element['wrapper']['widget_headline'] = array(
+        '#prefix' => '<br>',
+        '#type' => 'textfield',
+        '#title' => t('Widget headline'),
+        '#default_value' => !empty($item['widget_headline']) ? $item['widget_headline'] : '',
+        '#states' => array(
+          'visible' => array(
+            'input[name="field_mkws_node_widget[und][0][wrapper][toggle_title]"]' => array(
+              'checked' => TRUE,
+            ),
+          ),
+        ),
+      );
+
+      ding_mkws_include_all();
       $element['#attached'] = array(
         'css' => array(
           drupal_get_path('module', 'ding_mkws') . '/css/ding_mkws.fields.css',
@@ -110,9 +141,36 @@ function ding_mkws_field_presave($entity_type, $entity, $field, $instance, $lang
   switch ($instance['widget']['type']) {
     case 'ding_mkws_node_widget_default':
       foreach ($items as $delta => &$item) {
-        $item = $item['wrapper'];
+        $item = (!empty($item['wrapper'])) ? $item['wrapper'] : $item;
+        $item['resources'] = serialize($item['resources']);
+
+        if (!empty($item['toggle_title'])) {
+          $instance['label'] = $item['widget_headline'];
+          field_update_instance($instance);
+        }
+        else {
+          $instance['label'] = 'Content for LBR';
+          field_update_instance($instance);
+        }
+
+        if (empty($item['maxrecs'])) {
+          $item['maxrecs'] = 0;
+        }
       }
       break;
+  }
+}
+
+/**
+ * Implements hook_field_load().
+ */
+function ding_mkws_field_load($entity_type, $entities, $field, $instances, $langcode, &$items, $age) {
+  foreach ($entities as $id => $entity) {
+    foreach ($items[$id] as $delta => $item) {
+      if ($field['type'] == 'ding_mkws_node') {
+        $items[$id][$delta]['resources'] = unserialize($items[$id][$delta]['resources']);
+      }
+    }
   }
 }
 
@@ -136,32 +194,51 @@ function ding_mkws_field_formatter_info() {
  */
 function ding_mkws_field_formatter_view($entity_type, $entity, $field, $instance, $langcode, $items, $display) {
   $element = array();
-  switch ($display['type']) {
-    case 'ding_mkws_node_formatter_default':
-      $item = reset($items);
-      $hash = md5(implode('', $item));
-      $element[0] = array(
-        '#markup' => "<div data-hash='{$hash}' 
-            data-process='ProcessDataForNodeWidget' 
-            data-template='dingMkwsNodeWidget' 
-            class='ding-mkws-widget ding-mkws-node-widget'>
-        </div>",
-        '#attached' => array(
-          'css' => array(
-            drupal_get_path('module', 'ding_mkws') . '/css/ding_mkws.css',
+  if (!empty($items)) {
+    switch ($display['type']) {
+      case 'ding_mkws_node_formatter_default':
+        $item = reset($items);
+        if (empty($item['maxrecs'])) {
+          unset($item['maxrecs']);
+        }
+        $imploded = array_map(function ($i) {
+          return is_array($i) ? implode('', $i) : $i;
+        }, $item);
+        $hash = md5(implode('', $imploded));
+        ding_mkws_include_all();
+        $markup = array(
+          '#type' => 'html_tag',
+          '#tag' => 'div',
+          '#attributes' => array(
+            'data-hash' => $hash,
+            'data-process' => 'ProcessDataForNodeWidget',
+            'data-template' => 'dingMkwsNodeWidget',
+            'class' => array(
+              'ding-mkws-widget',
+              'ding-mkws-node-widget',
+            ),
           ),
-          'js' => array(
-            array(drupal_get_path('module', 'ding_mkws') . '/js/ding_mkws.js'),
-            array(
-              'type' => 'setting',
-              'data' => array(
-                $hash => $item,
+        );
+
+        $element[0] = array(
+          '#markup' => drupal_render($markup),
+          '#attached' => array(
+            'css' => array(
+              drupal_get_path('module', 'ding_mkws') . '/css/ding_mkws.css',
+            ),
+            'js' => array(
+              drupal_get_path('module', 'ding_mkws') . '/js/ding_mkws.js',
+              array(
+                'type' => 'setting',
+                'data' => array(
+                  $hash => $item,
+                ),
               ),
             ),
           ),
-        ),
-      );
-      break;
+        );
+        break;
+    }
   }
   return $element;
 }

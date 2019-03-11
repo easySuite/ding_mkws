@@ -1,0 +1,161 @@
+@import "../../../themes/ddbasic/sass/_base.scss";
+@import "_spinner";
+@import "susy";
+
+.ding-mkws-widget {
+  margin-bottom: 20px;
+  
+  .ding-mkws-content {
+    ul {
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      overflow: hidden;
+      list-style: none;
+    }
+  }
+}
+
+.page-node {
+  .field-type-ding-mkws-node {
+    clear: left;
+    padding-top: 20px;
+
+    .field-label {
+      font-weight: bold;
+      font-size: 16px;
+      padding-bottom: 10px;
+    }
+  }
+
+  .ding-mkws-widget {
+    overflow: hidden;
+
+    .ding-mkws-left {
+      @include span-columns(6 of 12);
+      margin-right: 10px;
+
+      @include media($tablet, $mobile) {
+        @include span-columns(3 of 3);
+
+        clear: both;
+        margin-left: 0;
+      }
+    }
+
+    .ding-mkws-rigt {
+      @include span-columns(6 of 12);
+
+      @include media($tablet, $mobile) {
+        @include span-columns(3 of 3);
+
+        clear: both;
+        margin-right: 0;
+      }
+   }
+
+    .ding-mkws-author {
+      white-space: nowrap;
+      width: 22em;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: block;
+    }
+  }
+}
+
+.ding-mkws-widget {
+  .ding-mkws-title {
+    font-weight: bold;
+    font-size: 16px;
+    padding-bottom: 10px;
+  }
+}
+
+.ding-campaign--content {
+  margin-top: 20px;
+  margin-bottom: 20px;
+}
+
+.ding-mkws-rows {
+  margin-bottom: 10px;
+  overflow: hidden;
+  padding: 10px 0;
+  list-style: none;
+  margin-bottom: 20px;
+
+  .left-label {
+    .ding-mkws-title,
+    .ding-mkws-target,
+    .ding-mkws-author,
+    .ding-mkws-date {
+      font-weight: bold;
+      font-size: 16px;
+    }
+  }
+
+  .right-value {
+    font-size: 16px;
+  }
+  &:nth-child(even) {
+    background-color: #f2f2f2;
+  }
+
+  &:nth-child(odd) {
+    background-color: #e8e8e8;
+  }
+
+  .row {
+    width: 100%;
+
+    .left-label,
+    .right-value {
+      width: auto;
+      float: left;
+      height: 30px;
+      padding: 5px 0;
+    }
+
+    .right-value {
+      width: 59%;
+      height: auto;
+      padding-right: 5px;
+
+      p {
+        margin-bottom: 10px;
+      }
+
+      .ding-mkws-author {
+        white-space: nowrap;
+        width: 15em;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: block;
+      }
+
+      .ding-mkws-title {
+        display: inline-block;
+        height: auto;
+        white-space: inherit;
+      }
+
+    }
+
+    .left-label {
+      width: 30%;
+      padding-left: 10px;
+      p {
+        margin-bottom: 10px;
+        width: auto;
+        
+      }
+    }
+  }
+}
+
+.ding-mkws-more-link {
+  float: right;
+  bottom: 0;
+}

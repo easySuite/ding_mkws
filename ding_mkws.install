@@ -1,16 +1,22 @@
 <?php
+
 /**
  * @file
  * Represents all logic related to (un)installing and DB scheme definition.
  */
 
-
 /**
  * Implements hook_install().
  */
 function ding_mkws_install() {
-  _ding_mkws_create_pane();
+  if (module_exists('ding_campaign')) {
+    $field = field_info_field('field_camp_settings');
+    $allowed_values = &$field['settings']['allowed_values'];
+    $allowed_values['mkws'] = 'MKWS';
+    field_update_field($field);
+  }
 
+  _ding_mkws_create_pane();
   variable_set('ding_mkws_global', array());
 }
 
@@ -18,6 +24,23 @@ function ding_mkws_install() {
  * Implements hook_uninstall().
  */
 function ding_mkws_uninstall() {
+  if (module_exists('ding_campaign')) {
+    db_update('ding_campaign')
+      ->fields(array(
+        'type' => 'plain',
+      ))
+      ->condition('type', 'mkws', '=')
+      ->execute();
+
+    $field = field_read_field('field_camp_settings');
+    $allowed_values = &$field['settings']['allowed_values'];
+    if (in_array('mkws', $allowed_values)) {
+      unset($allowed_values['mkws']);
+    }
+    $field['settings']['allowed_values'] = $allowed_values;
+    field_update_field($field);
+  }
+
   _ding_mkws_delete_pane();
   $base = field_info_field('field_mkws_node_widget');
   if (!$base) {
@@ -42,21 +65,34 @@ function ding_mkws_field_schema($field) {
           'default' => '',
         ),
         'resources' => array(
-          'type' => 'varchar',
-          'length' => '255',
+          'type' => 'text',
+          'size' => 'medium',
           'not null' => TRUE,
-          'default' => '',
         ),
         'amount' => array(
           'type' => 'int',
           'not null' => TRUE,
           'default' => 0,
         ),
+        'maxrecs' => array(
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'toggle_title' => array(
+          'type' => 'int',
+          'not null' => TRUE,
+          'default' => 0,
+        ),
+        'widget_headline' => array(
+          'type' => 'varchar',
+          'length' => '255',
+          'not null' => TRUE,
+          'default' => '',
+        ),
       );
       break;
-
   }
-
   return $schema;
 }
 
@@ -68,20 +104,26 @@ function _ding_mkws_create_pane() {
   ctools_include('plugins');
   ctools_get_plugins('page_manager', 'task_handlers', 'panel_context');
 
-  $task_names = array('search', 'ting_collection', 'ting_object');
-  foreach ($task_names as $task_name) {
-    $pane_id = 'new-ding_mkws_' . $task_name;
-    $pane = ding_mkws_get_items_pane($pane_id, $task_name);
+  $items = array(
+    'search_' => array('task_name' => 'search', 'region' => 'left_sidebar', 'location'=> t('Search result'), 'title' => t('Related content'), 'scope' => ''),
+    'ting_object_' => array('task_name' => 'ting_object', 'region' => 'attachment_1_1', 'location'=> t('Item page'), 'title' => t('Related content'), 'scope' => ''),
+    'ting_object_au' => array('task_name' => 'ting_object', 'region' => 'attachment_1_1', 'location'=> t('Item page'), 'title' => t('More by same author'), 'scope' => 'au'),
+  );
+  variable_set('ding_mkws_panes', $items);
 
-    $task = page_manager_get_task($task_name);
+  foreach ($items as $item) {
+    $pane_id = "new-ding_mkws_" . $item['task_name'] . '_' . $item['scope'];
+    $pane = ding_mkws_get_items_pane($pane_id, $item['task_name'], $item['scope'], $item['region']);
+
+    $task = page_manager_get_task($item['task_name']);
     $handlers = page_manager_load_task_handlers($task);
 
     foreach ($handlers as $handler_name => &$handler) {
-      if (strpos($handler_name, $task_name . '_panel_context') !== FALSE) {
+      if (strpos($handler_name, $item['task_name'] . '_panel_context') !== FALSE) {
         $display = panels_panel_context_get_display($handler);
 
         $display->content[$pane_id] = $pane;
-        $display->panels['left_sidebar'][] = $pane_id;
+        $display->panels[$item['region']][] = $pane_id;
 
         panels_save_display($display);
         page_manager_save_task_handler($handler);
@@ -94,11 +136,23 @@ function _ding_mkws_create_pane() {
 
 /**
  * Create mkws pane object.
+ *
+ * @param string $panel_id
+ *   Machine name of the pane.
+ * @param string $subtype
+ *   Pane subtype.
+ * @param string $scope
+ *   Scope of the search query.
+ * @param string $region
+ *   Region where the pane will be saved.
+ *
+ * @return object
+ *   Panels pane object.
  */
-function ding_mkws_get_items_pane($panel_id, $subtype) {
+function ding_mkws_get_items_pane($panel_id, $subtype = '', $scope = NULL, $region = 'left_sidebar') {
   $pane = new stdClass();
   $pane->pid = $panel_id;
-  $pane->panel = 'left_sidebar';
+  $pane->panel = $region;
   $pane->type = 'ding_mkws_item_list';
   $pane->subtype = $subtype;
   // By default pane is hidden.
@@ -108,6 +162,7 @@ function ding_mkws_get_items_pane($panel_id, $subtype) {
     'override_title' => 0,
     'override_title_text' => '',
     'override_title_heading' => 'h2',
+    'scope' => $scope,
   );
   $pane->cache = array();
   $pane->style = array(
@@ -127,16 +182,16 @@ function _ding_mkws_delete_pane() {
   ctools_include('plugins');
   ctools_get_plugins('page_manager', 'task_handlers', 'panel_context');
 
-  $task_names = array('search', 'ting_collection', 'ting_object');
-  foreach ($task_names as $task_name) {
-    $pane_id = 'new-ding_mkws_' . $task_name;
+  $items = variable_get('ding_mkws_panes', array());
+  foreach ($items as $item) {
+    $pane_id = 'new-ding_mkws_' . $item['task_name'] . '_' . $item['scope'];
     $pane = ding_mkws_get_items_pane($pane_id);
 
-    $task = page_manager_get_task($task_name);
+    $task = page_manager_get_task($item['task_name']);
     $handlers = page_manager_load_task_handlers($task);
 
     foreach ($handlers as $handler_name => &$handler) {
-      if (strpos($handler_name, $task_name . '_panel_context') !== FALSE) {
+      if (strpos($handler_name, $item['task_name'] . '_panel_context') !== FALSE) {
         $display = panels_panel_context_get_display($handler);
 
         $display->content[$pane_id] = $pane;
@@ -148,5 +203,45 @@ function _ding_mkws_delete_pane() {
         break;
       }
     }
+  }
+}
+
+/**
+ * Adding MKWS option to campaign settings.
+ */
+function ding_mkws_update_7001() {
+  if (module_exists('ding_campaign')) {
+    $instance = field_info_field('field_camp_settings');
+    $allowed_values = &$instance['settings']['allowed_values'];
+    $allowed_values['mkws'] = 'MKWS';
+    field_update_field($instance);
+  }
+}
+
+/**
+ * Adding new columns for handling widget headlines.
+ */
+function ding_mkws_update_7002() {
+  $fields = array(
+    'toggle_title' => array(
+      'type' => 'int',
+      'not null' => TRUE,
+      'default' => 0,
+    ),
+    'widget_headline' => array(
+      'type' => 'varchar',
+      'length' => '255',
+      'not null' => TRUE,
+      'default' => '',
+    ),
+  );
+
+  $field_name          = 'field_mkws_node_widget';
+  $data_table_name     = 'field_data_' . $field_name;
+  $revision_table_name = 'field_revision_' . $field_name;
+
+  foreach ($fields as $col_name => $value) {
+    db_add_field($data_table_name, $field_name . '_' . $col_name, $value);
+    db_add_field($revision_table_name, $field_name . '_' . $col_name, $value);
   }
 }
